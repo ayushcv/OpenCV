@@ -1,25 +1,8 @@
-#By Ayush Singh
-
 import cv2
 import numpy as np
 from pyzbar.pyzbar import decode
 import time
 import RPi.GPIO as GPIO
-from googleapiclient.http import MediaFileUpload
-from Google import Create_Service
-
-#google client variables
-CLIENT_SECRET_FILE = '/home/pi/Downloads/client_secret_368174336898-oaaah3llb1u44eulqe7cco9jg34ta2an.apps.googleusercontent.com.json'
-API_NAME = 'drive'
-API_VERSION = 'v3'
-SCOPES = ['https://www.googleapis.com/auth/drive']
-
-service = Create_Service(CLIENT_SECRET_FILE, API_NAME, API_VERSION, SCOPES)
-
-folder_id = '1VbcH3MZYEj6WNeryD2b282J3I2oQehSm'
-file_names= ['database.txt']
-mime_types= ['text/plain']
-file_id = '1_DX6Lumm3mFob0W6hQL4xhK1WE-Wfdlg'
 
 #Servo X axis
 GPIO.setmode(GPIO.BOARD)
@@ -38,7 +21,6 @@ need = 0
 #img = cv2.imread('/home/pi/Resources12/frame (1).png')
 with open('/home/pi/Resources12/myDataFile.text') as f:
     myDataList = f.read().splitlines()
-count = 0
 
 while True:
 
@@ -51,9 +33,9 @@ while True:
         if myData in myDataList:
             myOutput = 'Authorized'
             myColor = (0, 255, 0)
-            cv2.destroyWindow("LIVE")
+            cv2.destroyWindow("Result")
 
-            while count<=10:
+            while True:
                 success, img = cap.read()
                 imgGray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
 
@@ -63,48 +45,39 @@ while True:
                     cv2.rectangle(img, (x, y), (x + w, y + h), (255, 0, 0), 2)
                     cv2.putText(img, myData + ' User Detected', (x - 50,y + h +50 ), cv2.FONT_HERSHEY_COMPLEX, 1,(0, 0, 0), 2)
                     cv2.rectangle(img, (x + 20 , y + 20), (x + 100, y + 10 ), (0, 0, 255), 2)
-
-                    #Algor for x axis with ranges
                     if x == 0:
                         pwm.start(12)
-                    elif x in range(1,55):
+                    elif x in range(1,60):
                         pwm.start(10.8)
-                    elif x in range(56,110):
+                    elif x in range(61,120):
                         pwm.start(9.6)
-                    elif x in range(111,165):
+                    elif x in range(121,180):
                         pwm.start(8.4)
-                    elif x in range(166,220):
+                    elif x in range(181,239):
                         pwm.start(7.2)
-                    elif x in range(221,330):
+                    elif x == 240:
                         pwm.start(6)
-                    elif x in range(331,385):
+                    elif x in range(241,300):
                         pwm.start(5.2)
-                    elif x in range(386,440):
+                    elif x in range(301,360):
                         pwm.start(4.4)
-                    elif x in range(441,495):
+                    elif x in range(361,420):
                         pwm.start(3.6)
-                    elif x in range(496,549):
+                    elif x in range(421,479):
                         pwm.start(2.8)
-                    elif x == 550:
+                    elif x == 480:
                         pwm.start(2)
 
                     #print("A FACE IS DETECTED")
 
-                while need <1:
-                    r = open("/home/pi/Resources12/database.txt", "a")
-                    r.write("\n" + myData + " " + time.ctime())
-                    r.close()
-                    need = need + 1
-
+                    while need <1:
+                        r = open("/home/pi/Resources12/database", "a")
+                        r.write("\n" + myData + " " + time.ctime())
+                        r.close()
+                        need = need + 1
+                    obj = True
                     # break
 
-
-                    #google drive execute
-
-
-                        #Break Here Final
-                    obj = True
-                count = count + 1
                 cv2.imshow("Video", img)
                 if cv2.waitKey(1) & 0xFF == ord('q'):
                     break
@@ -120,21 +93,5 @@ while True:
         cv2.putText(img, myOutput, (pts2[0], pts2[1]), cv2.FONT_HERSHEY_SIMPLEX,
                     0.9, myColor, 2)
 
-    cv2.imshow('LIVE', img)
+    cv2.imshow('Result', img)
     cv2.waitKey(1)
-
-    if count>=9:
-        for file_name, mime_types in zip(file_names, mime_types):
-            file_metadata={
-                'name' : file_name,
-                #'parents' : [folder_id]
-            }
-
-            media = MediaFileUpload('/home/pi/Resources12/{0}'.format(file_name), mimetype=mime_types)
-
-            service.files().update(
-                fileId=file_id,
-                body= file_metadata,
-                media_body=media,
-                fields='id'
-            ).execute()

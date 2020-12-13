@@ -12,15 +12,18 @@ folder_id = '1VbcH3MZYEj6WNeryD2b282J3I2oQehSm'
 file_names= ['database.txt']
 mime_types= ['text/plain']
 
+file_id = '1_DX6Lumm3mFob0W6hQL4xhK1WE-Wfdlg'
+#https://drive.google.com/file/d/1_DX6Lumm3mFob0W6hQL4xhK1WE-Wfdlg/view?usp=sharing
 for file_name, mime_types in zip(file_names, mime_types):
     file_metadata={
         'name' : file_name,
-        'parents' : [folder_id]
+        #'parents' : [folder_id]
     }
 
     media = MediaFileUpload('/home/pi/Resources12/{0}'.format(file_name), mimetype=mime_types)
 
-    service.files().create(
+    service.files().update(
+        fileId=file_id,
         body= file_metadata,
         media_body=media,
         fields='id'
